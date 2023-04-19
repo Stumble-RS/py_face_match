@@ -1,4 +1,5 @@
 import face_recognition
+# from multiprocessing import Pool
 from flask import Flask,request,jsonify
 import urllib
 
@@ -10,13 +11,27 @@ def hello_world():
 
 @app.route("/compare", methods=['POST'])
 def comparePhotos():
-  resp = compareImages(request.form['path1'], request.form['path2'], request.form['local'])
+  target = request.json['target']
+  paths = request.json['paths']
+  local = request.json['local']
+  if not target or not paths:
+    return jsonify({"result": -1})
+  resp = compareMultipleImages(target, paths, local)
   return jsonify({"result": 1 if resp else 0})
 
-def compareImages(path1, path2, local = 0):
-  print(path1, path2, local)
+def compareMultipleImages(target, paths, local = 0):
+  # paths = list(map(lambda x: [target, x, local], paths))
+  # pool = Pool(processes=len(paths)) not worth it due process creation overhead
+  # pool.map(compareTwoImages, paths)
+  for path in paths:
+    if compareTwoImages(target, path, local):
+      return True
+  # resp = await asyncio.gather(*[compareTwoImages(i) for i in paths]) // async process not worth it, need to downgrade package
+  # print(resp)
+  return False
 
-  if local == 1:
+def compareTwoImages(path1, path2, local):
+  if local:
     image1 = face_recognition.load_image_file(path1)
     image2 = face_recognition.load_image_file(path2)
   else:
