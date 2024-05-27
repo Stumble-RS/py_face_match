@@ -7,7 +7,16 @@ Study and improve later on for lewd image handling & faster face recognition. [L
 ```bash
 source venv/bin/activate
 flask --app main run
+flask run
+gunicorn -w 4 'main:app'
 
 # to close
 deactivate
+```
+
+Updating:
+```bash
+docker build -t stumble-facematch --platform linux/amd64 .
+docker tag stumble-facematch:latest public.ecr.aws/n0u1m4r2/stumble-face-match:latest
+docker push public.ecr.aws/n0u1m4r2/stumble-face-match:latest
 ```
